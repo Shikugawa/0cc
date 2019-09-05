@@ -6,20 +6,21 @@ import (
 
 	"github.com/kr/pretty"
 
+	"github.com/gocc/generator"
+	"github.com/gocc/lexer"
 	"github.com/gocc/parser"
-	"github.com/gocc/tokenizer"
 )
 
 func main() {
 	code, _ := ioutil.ReadAll(os.Stdin)
 
-	tokenizer := tokenizer.Init(code)
-	tokenList := tokenizer.Tokenize()
-	// pretty.Println(tokenList)
+	lexer := lexer.Init(code)
+	tokenList := lexer.Tokenize()
 
 	parser := parser.Init(tokenList)
 	ast := parser.Parse()
 
-	pretty.Println(ast)
-	// generator.Generate()
+	gen := generator.Init(ast)
+
+	pretty.Println(gen.Asm)
 }

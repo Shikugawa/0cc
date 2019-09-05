@@ -2,7 +2,7 @@ package parser
 
 import (
 	"github.com/gocc/ast"
-	"github.com/gocc/tokenizer"
+	tokenizer "github.com/gocc/lexer"
 )
 
 type Parser struct {

@@ -1,18 +1,18 @@
 package ast
 
 // Expression Node Type
-type ASTNodeType int
+type ASTNodeKind int
 
 const (
-	NUMBER = iota
-	ADD    = iota
-	SUB    = iota
-	MUL    = iota
-	DIV    = iota
+	NUMBER ASTNodeKind = iota
+	ADD                = iota
+	SUB                = iota
+	MUL                = iota
+	DIV                = iota
 )
 
 type ASTNode struct {
-	Kind  ASTNodeType
+	Kind  ASTNodeKind
 	Value string
 	Left  *ASTNode
 	Right *ASTNode
