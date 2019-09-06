@@ -46,6 +46,18 @@ func (g *Generator) generate(node *ast.ASTNode) {
 		g.Asm += fmt.Sprintf("  popq %%rcx\n")
 		g.Asm += fmt.Sprintf("  imulq %%rcx, %%rax\n")
 		g.Asm += fmt.Sprintf("  pushq %%rax\n")
+	case ast.DIV:
+		if node.Left != nil {
+			g.generate(node.Left)
+		}
+		if node.Right != nil {
+			g.generate(node.Right)
+		}
+		g.Asm += fmt.Sprintf("  popq %%rax\n")
+		g.Asm += fmt.Sprintf("  popq %%rcx\n")
+		g.Asm += fmt.Sprintf("  movq $0, %%rdx\n") // 余りが格納されるrdxレジスタを0埋めで初期化
+		g.Asm += fmt.Sprintf("  idivq %%rcx\n")
+		g.Asm += fmt.Sprintf("  pushq %%rax\n")
 	case ast.NUMBER:
 		num, _ := strconv.ParseInt(node.Value, 10, 32)
 		g.Asm += fmt.Sprintf("  pushq $%d\n", num)
