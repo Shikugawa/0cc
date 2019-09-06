@@ -11,18 +11,18 @@ type Parser struct {
 }
 
 func (p *Parser) getToken() *tokenizer.Token {
-	p.pointer++
+	p.pointer--
 	token := &p.tokens[p.pointer]
 	return token
 }
 
-func (p *Parser) consume(operator string) bool {
-	if p.pointer+1 >= len(p.tokens) {
+func (p *Parser) lookAhead(operator string) bool {
+	if p.pointer-1 < 0 {
 		return false
 	}
 
-	if operator == p.tokens[p.pointer+1].Value {
-		p.pointer++
+	if operator == p.tokens[p.pointer-1].Value {
+		p.pointer--
 		return true
 	} else {
 		return false
@@ -48,13 +48,13 @@ func (p *Parser) parseTerm() *ast.ASTNode {
 	// Term = Factor | Factor * Term | Factor / Term
 	node := p.parseFactor()
 	for {
-		if p.consume("*") {
+		if p.lookAhead("*") {
 			node = &ast.ASTNode{
 				Kind:  ast.MUL,
 				Left:  node,
 				Right: p.parseTerm(),
 			}
-		} else if p.consume("/") {
+		} else if p.lookAhead("/") {
 			node = &ast.ASTNode{
 				Kind:  ast.DIV,
 				Left:  node,
@@ -70,13 +70,13 @@ func (p *Parser) parseExpression() *ast.ASTNode {
 	// Expr = Term | Term + Expr | Term - Expr
 	node := p.parseTerm()
 	for {
-		if p.consume("+") {
+		if p.lookAhead("+") {
 			node = &ast.ASTNode{
 				Kind:  ast.ADD,
 				Left:  node,
 				Right: p.parseExpression(),
 			}
-		} else if p.consume("-") {
+		} else if p.lookAhead("-") {
 			node = &ast.ASTNode{
 				Kind:  ast.SUB,
 				Left:  node,
@@ -96,6 +96,6 @@ func (p *Parser) Parse() *ast.ASTNode {
 func Init(tokens []tokenizer.Token) *Parser {
 	return &Parser{
 		tokens:  tokens,
-		pointer: -1,
+		pointer: len(tokens),
 	}
 }

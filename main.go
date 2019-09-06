@@ -19,7 +19,7 @@ func main() {
 
 	parser := parser.Init(tokenList)
 	ast := parser.Parse()
-
+	// pretty.Println(ast)
 	gen := generator.Init(ast)
 
 	pretty.Println(gen.Asm)
