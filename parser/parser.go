@@ -3,7 +3,6 @@ package parser
 import (
 	"github.com/gocc/ast"
 	tokenizer "github.com/gocc/lexer"
-	"github.com/kr/pretty"
 )
 
 type Parser struct {
@@ -30,6 +29,18 @@ func (p *Parser) lookAhead(operator string) bool {
 	}
 }
 
+func (p *Parser) lookCurrent(operator string) bool {
+	if p.pointer < 0 {
+		return false
+	}
+
+	if operator == p.tokens[p.pointer].Value {
+		return true
+	} else {
+		return false
+	}
+}
+
 func (p *Parser) parseCastExpr() *ast.ASTNode {
 	token := p.getToken()
 	node := &ast.ASTNode{
@@ -40,19 +51,26 @@ func (p *Parser) parseCastExpr() *ast.ASTNode {
 }
 
 func (p *Parser) parseUnaryExpr() *ast.ASTNode {
-	// UnaryExpr ::= (+|-)CastExpr | CastExpr
+	// UnaryExpr ::= (+|-)CastExpr | CastExpr | "(" AddExpr ")"
 	node := p.parseCastExpr()
-	if p.lookAhead("-") {
-		node = &ast.ASTNode{
-			Kind:  ast.UNARY,
-			Value: "-" + node.Value,
+	for {
+		if p.lookAhead("-") {
+			node = &ast.ASTNode{
+				Kind:  ast.UNARY,
+				Value: "-" + node.Value,
+			}
+		} else if p.lookCurrent(")") {
+			node = p.parseAddExpr()
+		} else if p.lookCurrent("(") {
+			return node
+		} else {
+			return node
 		}
 	}
-	return node
 }
 
 func (p *Parser) parseMulExpr() *ast.ASTNode {
-	// MulExpr ::= UnaryExpr | MulExpr * UnaryExpr | MulExpr / UnaryExpr | "(" AddExpr ")"
+	// MulExpr ::= UnaryExpr | MulExpr * UnaryExpr | MulExpr / UnaryExpr
 	node := p.parseUnaryExpr()
 	for {
 		if p.lookAhead("*") {
@@ -67,10 +85,6 @@ func (p *Parser) parseMulExpr() *ast.ASTNode {
 				Left:  node,
 				Right: p.parseMulExpr(),
 			}
-		} else if p.lookAhead(")") {
-			node = p.parseAddExpr()
-		} else if p.lookAhead("(") {
-			return node
 		} else {
 			return node
 		}
@@ -105,7 +119,6 @@ func (p *Parser) Parse() *ast.ASTNode {
 }
 
 func Init(tokens []tokenizer.Token) *Parser {
-	pretty.Println(tokens)
 	return &Parser{
 		tokens:  tokens,
 		pointer: len(tokens),

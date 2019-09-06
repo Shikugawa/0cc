@@ -10,13 +10,13 @@ import (
 
 func main() {
 	// code, _ := ioutil.ReadAll(os.Stdin)
-	code := []byte("1 + 2")
+	code := []byte("(1 + 2) / 2")
 	lexer := lexer.Init(code)
 	tokenList := lexer.Tokenize()
 
 	parser := parser.Init(tokenList)
 	ast := parser.Parse()
-	// pretty.Println(ast)
+
 	gen := generator.Init(ast)
 
 	pretty.Println(gen.Asm)
