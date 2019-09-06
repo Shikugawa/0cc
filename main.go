@@ -1,9 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
-	"os"
-
 	"github.com/kr/pretty"
 
 	"github.com/gocc/generator"
@@ -12,8 +9,8 @@ import (
 )
 
 func main() {
-	code, _ := ioutil.ReadAll(os.Stdin)
-
+	// code, _ := ioutil.ReadAll(os.Stdin)
+	code := []byte("1 + 2")
 	lexer := lexer.Init(code)
 	tokenList := lexer.Tokenize()
 

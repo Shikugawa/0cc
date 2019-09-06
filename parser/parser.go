@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/gocc/ast"
 	tokenizer "github.com/gocc/lexer"
+	"github.com/kr/pretty"
 )
 
 type Parser struct {
@@ -51,7 +52,7 @@ func (p *Parser) parseUnaryExpr() *ast.ASTNode {
 }
 
 func (p *Parser) parseMulExpr() *ast.ASTNode {
-	// Mul ::= UnaryExpr | Mul * UnaryExpr | Mul / UnaryExpr
+	// MulExpr ::= UnaryExpr | MulExpr * UnaryExpr | MulExpr / UnaryExpr | "(" AddExpr ")"
 	node := p.parseUnaryExpr()
 	for {
 		if p.lookAhead("*") {
@@ -66,27 +67,31 @@ func (p *Parser) parseMulExpr() *ast.ASTNode {
 				Left:  node,
 				Right: p.parseMulExpr(),
 			}
+		} else if p.lookAhead(")") {
+			node = p.parseAddExpr()
+		} else if p.lookAhead("(") {
+			return node
 		} else {
 			return node
 		}
 	}
 }
 
-func (p *Parser) parseAddExpression() *ast.ASTNode {
-	// Expr ::= Mul | Expr + Mul | Expr - Mul
+func (p *Parser) parseAddExpr() *ast.ASTNode {
+	// AddExpr ::= MulExpr | AddExpr + MulExpr | AddExpr - MulExpr
 	node := p.parseMulExpr()
 	for {
 		if p.lookAhead("+") {
 			node = &ast.ASTNode{
 				Kind:  ast.ADD,
 				Left:  node,
-				Right: p.parseAddExpression(),
+				Right: p.parseAddExpr(),
 			}
 		} else if p.lookAhead("-") {
 			node = &ast.ASTNode{
 				Kind:  ast.SUB,
 				Left:  node,
-				Right: p.parseAddExpression(),
+				Right: p.parseAddExpr(),
 			}
 		} else {
 			return node
@@ -95,11 +100,12 @@ func (p *Parser) parseAddExpression() *ast.ASTNode {
 }
 
 func (p *Parser) Parse() *ast.ASTNode {
-	node := p.parseAddExpression()
+	node := p.parseAddExpr()
 	return node
 }
 
 func Init(tokens []tokenizer.Token) *Parser {
+	pretty.Println(tokens)
 	return &Parser{
 		tokens:  tokens,
 		pointer: len(tokens),

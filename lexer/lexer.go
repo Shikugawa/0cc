@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -9,8 +8,10 @@ import (
 type TokenType int
 
 const (
-	INTVALUE TokenType = iota
-	OPERATOR           = iota
+	INTVALUE   TokenType = iota
+	OPERATOR             = iota
+	OP_BRACKET           = iota
+	CL_BRACKET           = iota
 )
 
 type Token struct {
@@ -24,22 +25,24 @@ type Tokenizer struct {
 	pointer     int
 }
 
-func (tokenizer *Tokenizer) forward() error {
-	if tokenizer.pointer >= len(tokenizer.code) {
-		return errors.New("can't forward more")
+func (tokenizer *Tokenizer) forward() {
+	if tokenizer.pointer == len(tokenizer.code)-1 {
+		tokenizer.currentByte = 0x0
+		return
 	}
+
 	tokenizer.pointer++
 	tokenizer.currentByte = tokenizer.code[tokenizer.pointer]
-	return nil
 }
 
-func (tokenizer *Tokenizer) backword() error {
-	if tokenizer.pointer <= -1 {
-		return errors.New("can't forward more")
+func (tokenizer *Tokenizer) backword() {
+	if tokenizer.pointer == 0 {
+		tokenizer.currentByte = 0x0
+		return
 	}
+
 	tokenizer.pointer--
 	tokenizer.currentByte = tokenizer.code[tokenizer.pointer]
-	return nil
 }
 
 func (tokenizer *Tokenizer) getNumber() []byte {
@@ -58,16 +61,18 @@ func (tokenizer *Tokenizer) getNumber() []byte {
 func (tokenizer *Tokenizer) getSymbol() []byte {
 	symbol := []byte{}
 	symbol = append(symbol, tokenizer.currentByte)
+	tokenizer.forward()
 	return symbol
 }
 
 func (tokenizer *Tokenizer) Tokenize() []Token {
 	tokenList := []Token{}
+	tokenizer.forward()
 	for {
-		if tokenizer.pointer >= len(tokenizer.code)-1 {
+		if tokenizer.currentByte == 0x0 {
 			break
 		}
-		tokenizer.forward()
+
 		switch tokenizer.currentByte {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			num := tokenizer.getNumber()
@@ -83,7 +88,22 @@ func (tokenizer *Tokenizer) Tokenize() []Token {
 				Value: fmt.Sprintf("%s", symbol),
 			}
 			tokenList = append(tokenList, token)
-		case ' ':
+		case '(':
+			symbol := tokenizer.getSymbol()
+			token := Token{
+				Type:  OP_BRACKET,
+				Value: fmt.Sprintf("%s", symbol),
+			}
+			tokenList = append(tokenList, token)
+		case ')':
+			symbol := tokenizer.getSymbol()
+			token := Token{
+				Type:  CL_BRACKET,
+				Value: fmt.Sprintf("%s", symbol),
+			}
+			tokenList = append(tokenList, token)
+		case ' ', '\n':
+			tokenizer.forward()
 			continue
 		default:
 			panic(fmt.Sprintf("character '%c' is invalid syntax", tokenizer.currentByte))
