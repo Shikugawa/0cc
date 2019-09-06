@@ -29,36 +29,42 @@ func (p *Parser) lookAhead(operator string) bool {
 	}
 }
 
-func (p *Parser) parseNumber() *ast.ASTNode {
+func (p *Parser) parseCastExpr() *ast.ASTNode {
 	token := p.getToken()
 	node := &ast.ASTNode{
-		Kind:  ast.NUMBER,
+		Kind:  ast.UNARY,
 		Value: token.Value,
 	}
 	return node
 }
 
-func (p *Parser) parseFactor() *ast.ASTNode {
-	// Factor = NUMBER
-	node := p.parseNumber()
+func (p *Parser) parseUnaryExpr() *ast.ASTNode {
+	// UnaryExpr ::= (+|-)CastExpr | CastExpr
+	node := p.parseCastExpr()
+	if p.lookAhead("-") {
+		node = &ast.ASTNode{
+			Kind:  ast.UNARY,
+			Value: "-" + node.Value,
+		}
+	}
 	return node
 }
 
-func (p *Parser) parseTerm() *ast.ASTNode {
-	// Term = Factor | Factor * Term | Factor / Term
-	node := p.parseFactor()
+func (p *Parser) parseMulExpr() *ast.ASTNode {
+	// Mul ::= UnaryExpr | Mul * UnaryExpr | Mul / UnaryExpr
+	node := p.parseUnaryExpr()
 	for {
 		if p.lookAhead("*") {
 			node = &ast.ASTNode{
 				Kind:  ast.MUL,
 				Left:  node,
-				Right: p.parseTerm(),
+				Right: p.parseMulExpr(),
 			}
 		} else if p.lookAhead("/") {
 			node = &ast.ASTNode{
 				Kind:  ast.DIV,
 				Left:  node,
-				Right: p.parseTerm(),
+				Right: p.parseMulExpr(),
 			}
 		} else {
 			return node
@@ -66,21 +72,21 @@ func (p *Parser) parseTerm() *ast.ASTNode {
 	}
 }
 
-func (p *Parser) parseExpression() *ast.ASTNode {
-	// Expr = Term | Term + Expr | Term - Expr
-	node := p.parseTerm()
+func (p *Parser) parseAddExpression() *ast.ASTNode {
+	// Expr ::= Mul | Expr + Mul | Expr - Mul
+	node := p.parseMulExpr()
 	for {
 		if p.lookAhead("+") {
 			node = &ast.ASTNode{
 				Kind:  ast.ADD,
 				Left:  node,
-				Right: p.parseExpression(),
+				Right: p.parseAddExpression(),
 			}
 		} else if p.lookAhead("-") {
 			node = &ast.ASTNode{
 				Kind:  ast.SUB,
 				Left:  node,
-				Right: p.parseExpression(),
+				Right: p.parseAddExpression(),
 			}
 		} else {
 			return node
@@ -89,7 +95,7 @@ func (p *Parser) parseExpression() *ast.ASTNode {
 }
 
 func (p *Parser) Parse() *ast.ASTNode {
-	node := p.parseExpression()
+	node := p.parseAddExpression()
 	return node
 }
 

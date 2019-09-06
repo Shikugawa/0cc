@@ -58,7 +58,7 @@ func (g *Generator) generate(node *ast.ASTNode) {
 		g.Asm += fmt.Sprintf("  movq $0, %%rdx\n") // 余りが格納されるrdxレジスタを0埋めで初期化
 		g.Asm += fmt.Sprintf("  idivq %%rcx\n")
 		g.Asm += fmt.Sprintf("  pushq %%rax\n")
-	case ast.NUMBER:
+	case ast.UNARY:
 		num, _ := strconv.ParseInt(node.Value, 10, 32)
 		g.Asm += fmt.Sprintf("  pushq $%d\n", num)
 	default:

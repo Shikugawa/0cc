@@ -4,11 +4,11 @@ package ast
 type ASTNodeKind int
 
 const (
-	NUMBER ASTNodeKind = iota
-	ADD                = iota
-	SUB                = iota
-	MUL                = iota
-	DIV                = iota
+	UNARY ASTNodeKind = iota
+	ADD               = iota
+	SUB               = iota
+	MUL               = iota
+	DIV               = iota
 )
 
 type ASTNode struct {
