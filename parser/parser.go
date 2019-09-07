@@ -50,8 +50,8 @@ func (p *Parser) parseCastExpr() *ast.ASTNode {
 	return node
 }
 
+// UnaryExpr ::= (+|-)CastExpr | CastExpr | "(" AddExpr ")"
 func (p *Parser) parseUnaryExpr() *ast.ASTNode {
-	// UnaryExpr ::= (+|-)CastExpr | CastExpr | "(" AddExpr ")"
 	node := p.parseCastExpr()
 	for {
 		if p.lookAhead("-") {
@@ -69,8 +69,8 @@ func (p *Parser) parseUnaryExpr() *ast.ASTNode {
 	}
 }
 
+// MulExpr ::= UnaryExpr | MulExpr * UnaryExpr | MulExpr / UnaryExpr
 func (p *Parser) parseMulExpr() *ast.ASTNode {
-	// MulExpr ::= UnaryExpr | MulExpr * UnaryExpr | MulExpr / UnaryExpr
 	node := p.parseUnaryExpr()
 	for {
 		if p.lookAhead("*") {
@@ -91,8 +91,8 @@ func (p *Parser) parseMulExpr() *ast.ASTNode {
 	}
 }
 
+// AddExpr ::= MulExpr | AddExpr + MulExpr | AddExpr - MulExpr
 func (p *Parser) parseAddExpr() *ast.ASTNode {
-	// AddExpr ::= MulExpr | AddExpr + MulExpr | AddExpr - MulExpr
 	node := p.parseMulExpr()
 	for {
 		if p.lookAhead("+") {
@@ -113,8 +113,52 @@ func (p *Parser) parseAddExpr() *ast.ASTNode {
 	}
 }
 
-func (p *Parser) Parse() *ast.ASTNode {
+// ShiftExpr ::= AddExpr
+func (p *Parser) parseShiftExpr() *ast.ASTNode {
 	node := p.parseAddExpr()
+	return node
+}
+
+// RelationalExpr ::= ShiftExpr
+//	| RelationalExpr < ShiftExpr
+//	| RelationalExpr > ShiftExpr
+//	| RelationalExpr <= ShiftExpr
+//	| RelationalExpr <= ShiftExpr
+func (p *Parser) parseRelationalExpr() *ast.ASTNode {
+	node := p.parseShiftExpr()
+	for {
+		if p.lookAhead("<") {
+			node = &ast.ASTNode{
+				Kind:  ast.RIGHT_INEQUALITY,
+				Left:  node,
+				Right: p.parseRelationalExpr(),
+			}
+		} else if p.lookAhead(">") {
+			node = &ast.ASTNode{
+				Kind:  ast.LEFT_INEQUALITY,
+				Left:  node,
+				Right: p.parseRelationalExpr(),
+			}
+		} else if p.lookAhead("<=") {
+			node = &ast.ASTNode{
+				Kind:  ast.RIGHT_INEQUALITY_EQ,
+				Left:  node,
+				Right: p.parseRelationalExpr(),
+			}
+		} else if p.lookAhead(">=") {
+			node = &ast.ASTNode{
+				Kind:  ast.LEFT_INEQUALITY_EQ,
+				Left:  node,
+				Right: p.parseRelationalExpr(),
+			}
+		} else {
+			return node
+		}
+	}
+}
+
+func (p *Parser) ParseExpr() *ast.ASTNode {
+	node := p.parseRelationalExpr()
 	return node
 }
 

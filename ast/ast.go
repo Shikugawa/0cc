@@ -4,11 +4,15 @@ package ast
 type ASTNodeKind int
 
 const (
-	UNARY ASTNodeKind = iota
-	ADD               = iota
-	SUB               = iota
-	MUL               = iota
-	DIV               = iota
+	UNARY               = iota
+	ADD                 = iota
+	SUB                 = iota
+	MUL                 = iota
+	DIV                 = iota
+	LEFT_INEQUALITY     = iota
+	LEFT_INEQUALITY_EQ  = iota
+	RIGHT_INEQUALITY    = iota
+	RIGHT_INEQUALITY_EQ = iota
 )
 
 type ASTNode struct {

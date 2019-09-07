@@ -1,23 +1,24 @@
 package main
 
 import (
+	"github.com/gocc/generator/x64"
 	"github.com/kr/pretty"
 
-	"github.com/gocc/generator"
 	"github.com/gocc/lexer"
 	"github.com/gocc/parser"
 )
 
 func main() {
 	// code, _ := ioutil.ReadAll(os.Stdin)
-	code := []byte("(1 + 2) / 2")
+	code := []byte("2 >= 3")
+
 	lexer := lexer.Init(code)
 	tokenList := lexer.Tokenize()
 
 	parser := parser.Init(tokenList)
-	ast := parser.Parse()
+	ast := parser.ParseExpr()
 
-	gen := generator.Init(ast)
+	gen := x64.Init(ast)
 
 	pretty.Println(gen.Asm)
 }

@@ -8,10 +8,15 @@ import (
 type TokenType int
 
 const (
-	INTVALUE   TokenType = iota
-	OPERATOR             = iota
-	OP_BRACKET           = iota
-	CL_BRACKET           = iota
+	INTVALUE               TokenType = iota
+	OPERATOR                         = iota
+	OP_BRACKET                       = iota
+	CL_BRACKET                       = iota
+	EQUAL                            = iota
+	LEFT_INEQUALITY                  = iota
+	RIGHT_INEQUALITY                 = iota
+	LEFT_INEQUALITY_EQUAL            = iota
+	RIGHT_INEQUALITY_EQUAL           = iota
 )
 
 type Token struct {
@@ -58,6 +63,27 @@ func (tokenizer *Tokenizer) getNumber() []byte {
 	return number
 }
 
+func (tokenizer *Tokenizer) getInequalitySymbol() []byte {
+	symbol := []byte{}
+	for {
+		if tokenizer.currentByte == '=' {
+			symbol = append(symbol, tokenizer.currentByte)
+			tokenizer.forward()
+			break
+		} else if tokenizer.currentByte == '>' {
+			symbol = append(symbol, tokenizer.currentByte)
+			tokenizer.forward()
+		} else if tokenizer.currentByte == '<' {
+			symbol = append(symbol, tokenizer.currentByte)
+			tokenizer.forward()
+		} else {
+			tokenizer.forward()
+			break
+		}
+	}
+	return symbol
+}
+
 func (tokenizer *Tokenizer) getSymbol() []byte {
 	symbol := []byte{}
 	symbol = append(symbol, tokenizer.currentByte)
@@ -102,7 +128,21 @@ func (tokenizer *Tokenizer) Tokenize() []Token {
 				Value: fmt.Sprintf("%s", symbol),
 			}
 			tokenList = append(tokenList, token)
-		case ' ', '\n':
+		case '<':
+			symbol := tokenizer.getInequalitySymbol()
+			token := Token{
+				Type:  RIGHT_INEQUALITY,
+				Value: fmt.Sprintf("%s", symbol),
+			}
+			tokenList = append(tokenList, token)
+		case '>':
+			symbol := tokenizer.getInequalitySymbol()
+			token := Token{
+				Type:  LEFT_INEQUALITY,
+				Value: fmt.Sprintf("%s", symbol),
+			}
+			tokenList = append(tokenList, token)
+		case ' ', '\n', '\t':
 			tokenizer.forward()
 			continue
 		default:
