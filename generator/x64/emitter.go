@@ -35,8 +35,8 @@ func emitDivInstr(g *Generator) {
 func emitLeftCompInstr(g *Generator) {
 	emitPopBinaryInstr(g)
 	g.Asm += fmt.Sprintf("  cmpq %%rcx, %%rax\n")
-	g.Asm += fmt.Sprintf("  movq $0, %%rax\n") // raxレジスタの初期化
-	g.Asm += fmt.Sprintf("  setnl %%al\n")     // 左項の方が大きかったらraxレジスタに0x01を格納する
+	g.Asm += fmt.Sprintf("  movq $0, %%rax\n")
+	g.Asm += fmt.Sprintf("  setnl %%al\n")
 	g.Asm += fmt.Sprintf("  movzb %%al, %%rax\n")
 	g.Asm += fmt.Sprintf("  pushq %%rax\n")
 }
@@ -44,8 +44,8 @@ func emitLeftCompInstr(g *Generator) {
 func emitRightCompInstr(g *Generator) {
 	emitPopBinaryInstr(g)
 	g.Asm += fmt.Sprintf("  cmpq %%rcx, %%rax\n")
-	g.Asm += fmt.Sprintf("  movq $0, %%rax\n") // raxレジスタの初期化
-	g.Asm += fmt.Sprintf("  setng %%al\n")     // 左項の方が大きかったらraxレジスタに0x01を格納する
+	g.Asm += fmt.Sprintf("  movq $0, %%rax\n")
+	g.Asm += fmt.Sprintf("  setng %%al\n")
 	g.Asm += fmt.Sprintf("  movzb %%al, %%rax\n")
 	g.Asm += fmt.Sprintf("  pushq %%rax\n")
 }
@@ -53,8 +53,8 @@ func emitRightCompInstr(g *Generator) {
 func emitLeftCompEqInstr(g *Generator) {
 	emitPopBinaryInstr(g)
 	g.Asm += fmt.Sprintf("  cmpq %%rcx, %%rax\n")
-	g.Asm += fmt.Sprintf("  movq $0, %%rax\n") // raxレジスタの初期化
-	g.Asm += fmt.Sprintf("  setnle %%al\n")    // 左項の方が大きかったらraxレジスタに0x01を格納する
+	g.Asm += fmt.Sprintf("  movq $0, %%rax\n")
+	g.Asm += fmt.Sprintf("  setnle %%al\n")
 	g.Asm += fmt.Sprintf("  movzb %%al, %%rax\n")
 	g.Asm += fmt.Sprintf("  pushq %%rax\n")
 }
@@ -62,8 +62,26 @@ func emitLeftCompEqInstr(g *Generator) {
 func emitRightCompEqInstr(g *Generator) {
 	emitPopBinaryInstr(g)
 	g.Asm += fmt.Sprintf("  cmpq %%rcx, %%rax\n")
-	g.Asm += fmt.Sprintf("  movq $0, %%rax\n") // raxレジスタの初期化
-	g.Asm += fmt.Sprintf("  setnge %%al\n")    // 左項の方が大きかったらraxレジスタに0x01を格納する
+	g.Asm += fmt.Sprintf("  movq $0, %%rax\n")
+	g.Asm += fmt.Sprintf("  setnge %%al\n")
+	g.Asm += fmt.Sprintf("  movzb %%al, %%rax\n")
+	g.Asm += fmt.Sprintf("  pushq %%rax\n")
+}
+
+func emitCompEqInstr(g *Generator) {
+	emitPopBinaryInstr(g)
+	g.Asm += fmt.Sprintf("  cmpq %%rcx, %%rax\n")
+	g.Asm += fmt.Sprintf("  movq $0, %%rax\n")
+	g.Asm += fmt.Sprintf("  sete %%al\n")
+	g.Asm += fmt.Sprintf("  movzb %%al, %%rax\n")
+	g.Asm += fmt.Sprintf("  pushq %%rax\n")
+}
+
+func emitCompNotEqlInstr(g *Generator) {
+	emitPopBinaryInstr(g)
+	g.Asm += fmt.Sprintf("  cmpq %%rcx, %%rax\n")
+	g.Asm += fmt.Sprintf("  movq $0, %%rax\n")
+	g.Asm += fmt.Sprintf("  setne %%al\n")
 	g.Asm += fmt.Sprintf("  movzb %%al, %%rax\n")
 	g.Asm += fmt.Sprintf("  pushq %%rax\n")
 }

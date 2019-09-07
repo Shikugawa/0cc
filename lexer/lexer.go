@@ -8,15 +8,18 @@ import (
 type TokenType int
 
 const (
-	INTVALUE               TokenType = iota
-	OPERATOR                         = iota
-	OP_BRACKET                       = iota
-	CL_BRACKET                       = iota
-	EQUAL                            = iota
-	LEFT_INEQUALITY                  = iota
-	RIGHT_INEQUALITY                 = iota
-	LEFT_INEQUALITY_EQUAL            = iota
-	RIGHT_INEQUALITY_EQUAL           = iota
+	INTVALUE               = iota
+	OPERATOR               = iota
+	OP_BRACKET             = iota
+	CL_BRACKET             = iota
+	ASSIGN                 = iota
+	EQUAL                  = iota
+	NOT_EQUAL              = iota
+	NOT                    = iota
+	LEFT_INEQUALITY        = iota
+	RIGHT_INEQUALITY       = iota
+	LEFT_INEQUALITY_EQUAL  = iota
+	RIGHT_INEQUALITY_EQUAL = iota
 )
 
 type Token struct {
@@ -84,6 +87,43 @@ func (tokenizer *Tokenizer) getInequalitySymbol() []byte {
 	return symbol
 }
 
+func (tokenizer *Tokenizer) getEqualSymbol() []byte {
+	symbol := []byte{}
+	for {
+		if len(symbol) > 2 {
+			panic("Invlid symbol was detected")
+		}
+		if tokenizer.currentByte == '=' {
+			symbol = append(symbol, tokenizer.currentByte)
+			tokenizer.forward()
+		} else {
+			tokenizer.forward()
+			break
+		}
+	}
+	return symbol
+}
+
+func (tokenizer *Tokenizer) getNotEqualSymbol() []byte {
+	symbol := []byte{}
+	for {
+		if len(symbol) > 2 {
+			panic("Invlid symbol was detected")
+		}
+		if tokenizer.currentByte == '!' {
+			symbol = append(symbol, tokenizer.currentByte)
+			tokenizer.forward()
+		} else if tokenizer.currentByte == '=' {
+			symbol = append(symbol, tokenizer.currentByte)
+			tokenizer.forward()
+		} else {
+			tokenizer.forward()
+			break
+		}
+	}
+	return symbol
+}
+
 func (tokenizer *Tokenizer) getSymbol() []byte {
 	symbol := []byte{}
 	symbol = append(symbol, tokenizer.currentByte)
@@ -98,50 +138,78 @@ func (tokenizer *Tokenizer) Tokenize() []Token {
 		if tokenizer.currentByte == 0x0 {
 			break
 		}
-
+		var token *Token
 		switch tokenizer.currentByte {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			num := tokenizer.getNumber()
-			token := Token{
+			token = &Token{
 				Type:  INTVALUE,
 				Value: fmt.Sprintf("%s", num),
 			}
-			tokenList = append(tokenList, token)
+			tokenList = append(tokenList, *token)
 		case '+', '-', '*', '/':
 			symbol := tokenizer.getSymbol()
-			token := Token{
+			token = &Token{
 				Type:  OPERATOR,
 				Value: fmt.Sprintf("%s", symbol),
 			}
-			tokenList = append(tokenList, token)
+			tokenList = append(tokenList, *token)
 		case '(':
 			symbol := tokenizer.getSymbol()
-			token := Token{
+			token = &Token{
 				Type:  OP_BRACKET,
 				Value: fmt.Sprintf("%s", symbol),
 			}
-			tokenList = append(tokenList, token)
+			tokenList = append(tokenList, *token)
 		case ')':
 			symbol := tokenizer.getSymbol()
-			token := Token{
+			token = &Token{
 				Type:  CL_BRACKET,
 				Value: fmt.Sprintf("%s", symbol),
 			}
-			tokenList = append(tokenList, token)
+			tokenList = append(tokenList, *token)
 		case '<':
 			symbol := tokenizer.getInequalitySymbol()
-			token := Token{
+			token = &Token{
 				Type:  RIGHT_INEQUALITY,
 				Value: fmt.Sprintf("%s", symbol),
 			}
-			tokenList = append(tokenList, token)
+			tokenList = append(tokenList, *token)
 		case '>':
 			symbol := tokenizer.getInequalitySymbol()
-			token := Token{
+			token = &Token{
 				Type:  LEFT_INEQUALITY,
 				Value: fmt.Sprintf("%s", symbol),
 			}
-			tokenList = append(tokenList, token)
+			tokenList = append(tokenList, *token)
+		case '=':
+			symbol := tokenizer.getEqualSymbol()
+			if len(symbol) == 1 {
+				token = &Token{
+					Type:  ASSIGN,
+					Value: fmt.Sprintf("%s", symbol),
+				}
+			} else if len(symbol) == 2 {
+				token = &Token{
+					Type:  EQUAL,
+					Value: fmt.Sprintf("%s", symbol),
+				}
+			}
+			tokenList = append(tokenList, *token)
+		case '!':
+			symbol := tokenizer.getNotEqualSymbol()
+			if len(symbol) == 1 {
+				token = &Token{
+					Type:  NOT,
+					Value: fmt.Sprintf("%s", symbol),
+				}
+			} else if len(symbol) == 2 {
+				token = &Token{
+					Type:  NOT_EQUAL,
+					Value: fmt.Sprintf("%s", symbol),
+				}
+			}
+			tokenList = append(tokenList, *token)
 		case ' ', '\n', '\t':
 			tokenizer.forward()
 			continue

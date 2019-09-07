@@ -42,6 +42,10 @@ func (g *Generator) generate(node *ast.ASTNode) {
 		emitLeftCompEqInstr(g)
 	case ast.RIGHT_INEQUALITY_EQ:
 		emitRightCompEqInstr(g)
+	case ast.EQUAL:
+		emitCompEqInstr(g)
+	case ast.NOT_EQUAL:
+		emitCompNotEqlInstr(g)
 	default:
 		panic(fmt.Sprintf("\"%s\" is not supported", node.Kind))
 	}

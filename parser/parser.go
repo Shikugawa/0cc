@@ -151,6 +151,18 @@ func (p *Parser) parseRelationalExpr() *ast.ASTNode {
 				Left:  node,
 				Right: p.parseRelationalExpr(),
 			}
+		} else if p.lookAhead("==") {
+			node = &ast.ASTNode{
+				Kind:  ast.EQUAL,
+				Left:  node,
+				Right: p.parseRelationalExpr(),
+			}
+		} else if p.lookAhead("!=") {
+			node = &ast.ASTNode{
+				Kind:  ast.NOT_EQUAL,
+				Left:  node,
+				Right: p.parseRelationalExpr(),
+			}
 		} else {
 			return node
 		}

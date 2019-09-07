@@ -9,6 +9,8 @@ const (
 	SUB                 = iota
 	MUL                 = iota
 	DIV                 = iota
+	EQUAL               = iota
+	NOT_EQUAL           = iota
 	LEFT_INEQUALITY     = iota
 	LEFT_INEQUALITY_EQ  = iota
 	RIGHT_INEQUALITY    = iota
